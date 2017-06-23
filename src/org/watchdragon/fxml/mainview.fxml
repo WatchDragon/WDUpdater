@@ -6,7 +6,7 @@
 
 <TabPane fx:id="mainTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.watchdragon.controller.MainController">
   <tabs>
-    <Tab text="Untitled Tab 1" />
+    <Tab text="游戏启动" />
     <Tab text="自动更新" />
   </tabs>
 </TabPane>
