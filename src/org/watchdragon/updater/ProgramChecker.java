@@ -8,16 +8,18 @@ import javafx.scene.control.Alert;
 import org.watchdragon.Main;
 import org.watchdragon.file.FileUtils;
 import org.watchdragon.http.HttpUtils;
+import org.watchdragon.http.downloader.Download;
 
 import java.io.IOException;
 
 /**
  * Created by tt36999 on 2017/6/23.
  */
-public class ProgramChecker implements IUpdateAble {
+public class ProgramChecker {
     private JsonArray localJson;
-    public ProgramChecker(){
-        String res = HttpUtils.get(Main.GET_VERSION_JSON_URL,"");
+    public ProgramChecker() throws IOException {
+        HttpUtils http = new HttpUtils(Main.GET_VERSION_JSON_URL);
+        String res = http.get().getResponse();
         JsonParser parser = new JsonParser();
         String jsonString = this.readJson();
         if(null==jsonString){
@@ -31,7 +33,7 @@ public class ProgramChecker implements IUpdateAble {
                 JsonObject r = remot.getAsJsonObject();
                 JsonObject l = local.getAsJsonObject();
                 if(r.get("name").equals(l.get("name"))&&!r.get("version").equals(l.get("version"))){
-                    System.out.println(r.get("name").getAsString()+":need update");
+                    Download.downloadFile(r.get("url").getAsString(),"");
                 }
             }
         }
@@ -47,7 +49,8 @@ public class ProgramChecker implements IUpdateAble {
 
     private String createdNewJson(){
         try {
-            String json = HttpUtils.get(Main.GET_VERSION_JSON_URL,"");
+            HttpUtils http = new HttpUtils(Main.GET_VERSION_JSON_URL);
+            String json = http.get().getResponse();
             FileUtils.writeFileFromString(json,Main.PROGRAM_VERSION_JSON,false);
             return json;
         } catch (IOException e) {
