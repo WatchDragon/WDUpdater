@@ -39,7 +39,7 @@ public class ProgramChecker {
         }
     }
 
-    private String readJson(){
+    private String readJson() throws IOException {
         try {
            return FileUtils.readFileAsString(Main.PROGRAM_VERSION_JSON);
         } catch (IOException e) {
@@ -47,15 +47,10 @@ public class ProgramChecker {
         }
     }
 
-    private String createdNewJson(){
-        try {
+    private String createdNewJson() throws IOException {
             HttpUtils http = new HttpUtils(Main.GET_VERSION_JSON_URL);
             String json = http.get().getResponse();
             FileUtils.writeFileFromString(json,Main.PROGRAM_VERSION_JSON,false);
             return json;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }

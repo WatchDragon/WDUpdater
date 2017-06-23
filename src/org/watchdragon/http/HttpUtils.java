@@ -67,7 +67,7 @@ public class HttpUtils {
                 result.append(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           throw e;
         } finally {
             if (bufferedReader != null)
                 bufferedReader.close();
