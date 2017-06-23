@@ -9,6 +9,7 @@ import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import org.watchdragon.api.IInitialzation;
 import org.watchdragon.controller.MainController;
+import org.watchdragon.controller.UpdaterController;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,10 @@ public class Main extends Application {
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root, 800, 600);
         MainController controller = fxmlLoader.getController();
+        this.registerControllers();
+        for(IInitialzation tabs : controllers){
+            tabs.onInit();
+        }
         controller.setStage(primaryStage);
         controller.setScene(scene);
         primaryStage.setTitle("看龙启动更新器");
@@ -32,8 +37,12 @@ public class Main extends Application {
     }
 
     private void registerControllers(){
-        MainController controller = new MainController();
-        controllers.add(controller);
+        //你的注册要在我的页面之前，这样能保证你的启动器页面先初始化
+
+        //注册更新页面控制器，我也不知道这样行不行。我猜的
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/updaterview.fxml"));
+        UpdaterController updaterController = fxmlLoader.getController();
+        controllers.add(updaterController);
     }
 
     public static void main(String[] args) {
