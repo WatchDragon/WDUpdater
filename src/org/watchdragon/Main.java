@@ -14,6 +14,7 @@ import java.util.Optional;
 public class Main extends Application {
     public static final String SERVER_ROOT="http://127.0.0.1/WDUpdater/";
     public static final String GET_VERSION_JSON_URL = SERVER_ROOT+"Json/getGoJarJson";
+
     public static final String CINFIG_DIR = System.getProperty("user.dir")+"/config/";
     public static final String PROGRAM_VERSION_JSON = CINFIG_DIR+"prgram.json";
 
