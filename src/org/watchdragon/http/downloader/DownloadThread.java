@@ -46,15 +46,14 @@ public class DownloadThread {
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(response.getEntity().getContent());
             byte[] buffer = new byte[1024];
-            int byteReaded;
+            int byteReadied;
             File file = new File(this.fileName);
-            RandomAccessFile randomAccessFile = null;
-            randomAccessFile = new RandomAccessFile(file, "rw");
+            RandomAccessFile randomAccessFile =  new RandomAccessFile(file, "rw");
             logger.log(Level.INFO,"Thread "+this.ID + "Reading file");
-            while ((byteReaded = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
+            while ((byteReadied = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
                 randomAccessFile.seek(this.offset);
-                randomAccessFile.write(buffer, 0, byteReaded);
-                this.offset += byteReaded;
+                randomAccessFile.write(buffer, 0, byteReadied);
+                this.offset += byteReadied;
             }
             randomAccessFile.close();
             bufferedInputStream.close();

@@ -66,7 +66,7 @@ public class HttpUtils {
             while ((line = bufferedReader.readLine()) != null) {
                 result.append(line);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
            throw e;
         } finally {
             if (bufferedReader != null)
