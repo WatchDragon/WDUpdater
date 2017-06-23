@@ -32,7 +32,8 @@ public class Main extends Application {
     }
 
     private void registerControllers(){
-
+        MainController controller = new MainController();
+        controllers.add(controller);
     }
 
     public static void main(String[] args) {
