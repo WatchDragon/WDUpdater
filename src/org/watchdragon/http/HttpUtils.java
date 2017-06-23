@@ -1,59 +1,88 @@
 package org.watchdragon.http;
 
+import javax.xml.ws.http.HTTPException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
+import java.net.*;
+import java.util.*;
 
 /**
  * Created by tt36999 on 2017/6/23.
  */
 public class HttpUtils {
-    public static String get(String url, String param) {
-        String result = "";
-        BufferedReader in = null;
-        try {
-            String urlNameString = url + "?" + param;
-            URL realUrl = new URL(urlNameString);
-            // 打开和URL之间的连接
-            URLConnection connection = realUrl.openConnection();
-            // 设置通用的请求属性
-            connection.setRequestProperty("accept", "*/*");
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("user-agent",
-                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            // 建立实际的连接
-            connection.connect();
-            // 获取所有响应头字段
-            Map<String, List<String>> map = connection.getHeaderFields();
-            // 遍历所有的响应头字段
-            for (String key : map.keySet()) {
-                System.out.println(key + "--->" + map.get(key));
+    protected String url;
+    protected HashMap<String,String> paramsString = new HashMap<>();
+    protected Map<String,List<String>> header;
+    protected String response;
+    protected HttpURLConnection urlConnection;
+    protected String paraStr = new String();
+
+    public HttpUtils(String url) throws IOException {
+        if(paramsString.size()>0) {
+            paraStr += "?";
+            Iterator iterator = paramsString.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator.next();
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                paraStr += key + "=" + value + "&";
             }
-            // 定义 BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            paraStr = paraStr.substring(0, paraStr.length() - 1);
+            this.url += paraStr;
+        }
+        this.url = url;
+        URL linkUrl = new URL(this.url.trim());
+        urlConnection = (HttpURLConnection) linkUrl.openConnection();
+        urlConnection.setConnectTimeout(10000);
+        urlConnection.setReadTimeout(10000);
+        urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+    }
+
+    public void addParaString(String key,Object value){
+        paramsString.put(key,value.toString());
+    }
+
+    public HttpUtils head() throws IOException {
+        urlConnection.setRequestMethod("HEAD");
+        int responseCode = urlConnection.getResponseCode();
+        if(responseCode>=400){
+            throw new HTTPException(responseCode);
+        }
+        this.header=urlConnection.getHeaderFields();
+        return this;
+    }
+
+    public HttpUtils get() throws IOException {
+        BufferedReader bufferedReader = null;
+        StringBuilder result = new StringBuilder();
+        try {
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setDoOutput(false);
+            urlConnection.connect();
+            this.header = urlConnection.getHeaderFields();
+            bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
             String line;
-            while ((line = in.readLine()) != null) {
-                result += line;
+            while ((line = bufferedReader.readLine()) != null) {
+                result.append(line);
             }
         } catch (Exception e) {
-            System.out.println("发送GET请求出现异常！" + e);
             e.printStackTrace();
+        } finally {
+            if (bufferedReader != null)
+                bufferedReader.close();
         }
-        // 使用finally块来关闭输入流
-        finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-        return result;
+        this.response = result.toString();
+        return this;
+    }
+
+    public List<String> getHeader(String name){
+        List<String> list = this.header.get(name);
+        return list;
+    }
+
+    public String getResponse(){
+        return this.response;
     }
 
 }
