@@ -39,7 +39,7 @@ public class ProgramChecker {
         }
     }
 
-    private String readJson() throws IOException {
+    private String readJson() throws IOException{
         try {
            return FileUtils.readFileAsString(Main.PROGRAM_VERSION_JSON);
         } catch (IOException e) {
