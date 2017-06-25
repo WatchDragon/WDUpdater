@@ -13,5 +13,8 @@
     <orderEntry type="library" name="gson-2.8.1" level="project" />
     <orderEntry type="library" name="httpclient-4.5.3" level="project" />
     <orderEntry type="library" name="httpcore-4.4.6" level="project" />
+    <orderEntry type="library" name="jmccc-2.4" level="project" />
+    <orderEntry type="library" name="jmccc-yggdrasil-authenticator-2.4" level="project" />
+    <orderEntry type="library" name="json-20170516" level="project" />
   </component>
 </module>
