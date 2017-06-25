@@ -1,6 +1,7 @@
 package org.watchdragon.controller;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import org.to2mbn.jmccc.auth.AuthenticationException;
 import org.to2mbn.jmccc.auth.Authenticator;
 import org.to2mbn.jmccc.auth.OfflineAuthenticator;
@@ -18,12 +19,14 @@ import javafx.scene.web.WebView;
 import org.to2mbn.jmccc.util.ExtraArgumentsTemplates;
 import org.watchdragon.Main;
 import org.watchdragon.file.FileUtils;
+import org.watchdragon.model.LauncherSetting;
 import org.watchdragon.model.MCVerisonItem;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * Created by zjyl1994 on 2017/6/24.
@@ -42,7 +45,7 @@ public class LauncherController {
     @FXML//界面初始化方法，自动被JavaFX调用
     public boolean initialize () {
         memorySize.getItems().removeAll(memorySize.getItems());
-        memorySize.getItems().addAll("512MB","768MB","1GB","1.25GB","1.5GB","2GB","2.5GB","3GB","3.5GB","4GB","6GB","8GB");
+        memorySize.getItems().addAll("500MB","750MB","1000MB","1250MB","1500MB","2000MB","2500MB","3000MB","3500MB","4000MB","6000MB","8000MB");
         memorySize.getSelectionModel().select(2);
         wdNews.getEngine().load("https://news.watchdragon.org/");
         try {
@@ -63,6 +66,19 @@ public class LauncherController {
             }
             mcVersion.getSelectionModel().select(0);
         }
+        Optional<LauncherSetting> launcherSetting = loadSetting();
+        if(launcherSetting.isPresent()){
+            LauncherSetting setting = launcherSetting.get();
+            playerName.setText(setting.getUsername());
+            passWord.setText(setting.getPassword());
+            legalSwitch.setSelected(setting.isLegal());
+            memorySize.getSelectionModel().select(setting.getMemSelect());
+            if(mcVersion.getItems().contains(setting.getVersion())){
+                mcVersion.getSelectionModel().select(setting.getVersion());
+            }else{
+                mcVersion.getSelectionModel().select(0);
+            }
+        }
         return true;
     }
 
@@ -71,6 +87,11 @@ public class LauncherController {
     }
 
     public void startGame(ActionEvent actionEvent) {
+        String username = playerName.getText();
+        if(!Pattern.compile("[a-zA-Z0-9_]{4,16}").matcher(username).matches()){
+            Main.showAlert("用户名只允许英文字母数字下划线，大小写不限，4-16个字符。","请不要搞事情", Alert.AlertType.WARNING);
+            return;
+        };
         Optional<MCVerisonItem> vi = Optional.empty();
         if(versions.isPresent()){
             MCVerisonItem[] mcVerisons = versions.get();
@@ -87,13 +108,13 @@ public class LauncherController {
             Authenticator auther;
             if(this.legalSwitch.isSelected()){
                 try {
-                    auther = YggdrasilAuthenticator.password(playerName.getText(), passWord.getText());
+                    auther = YggdrasilAuthenticator.password(username, passWord.getText());
                 } catch (AuthenticationException e) {
                     Main.showAlert("无法登陆正版账号，请确定用户密码正确并保证网络链接通畅。","正版登录", Alert.AlertType.ERROR);
                     return;
                 }
             }else{
-                auther = new OfflineAuthenticator(playerName.getText());
+                auther = new OfflineAuthenticator(username);
             }
             try {
                 LaunchOption lo = new LaunchOption(mcInstance.getForgeVersion(), auther, dir);
@@ -103,13 +124,14 @@ public class LauncherController {
                 exArgs.add(ExtraArgumentsTemplates.FML_IGNORE_PATCH_DISCREPANCISE);
                 lo.setExtraMinecraftArguments(exArgs);
                 launcher.launch(lo);
+                saveSetting();
                 Platform.exit();
                 System.exit(0);
             } catch (LaunchException e) {
                 Main.showAlert("无法启动游戏！","启动失败", Alert.AlertType.ERROR);
                 return;
             } catch (IOException e) {
-                Main.showAlert("未知I/O错误！请确定整合包存在","启动失败", Alert.AlertType.ERROR);
+                Main.showAlert("未知I/O错误！请确定磁盘可读写","启动失败", Alert.AlertType.ERROR);
                 return;
             }
         }else{
@@ -118,10 +140,28 @@ public class LauncherController {
     }
 
     private int StringMem2int(String mem){
-        if(mem.endsWith("GB")){
-            return (int)(1024 * Float.parseFloat(mem.replace("GB","")));
-        }else{
-            return Integer.parseInt(mem.replace("MB",""));
+        return Integer.parseInt(mem.replace("MB",""));
+    }
+
+    private void saveSetting() throws IOException {
+        LauncherSetting ls = new LauncherSetting();
+        ls.setLegal(legalSwitch.isSelected());
+        ls.setMemSelect(memorySize.getSelectionModel().getSelectedIndex());
+        ls.setPassword(passWord.getText());
+        ls.setUsername(playerName.getText());
+        ls.setVersion((String)mcVersion.getSelectionModel().getSelectedItem());
+        Gson gson = new Gson();
+        String cfg = gson.toJson(ls);
+        System.out.print(cfg);
+        FileUtils.writeFileFromString(cfg,"config.json",false);
+    }
+    private Optional<LauncherSetting> loadSetting(){
+        try {
+            String cfg = FileUtils.readFileAsString("config.json");
+            Gson gson = new Gson();
+            return Optional.of(gson.fromJson(cfg, LauncherSetting.class));
+        } catch (IOException e) {
+            return Optional.empty();
         }
     }
 }
