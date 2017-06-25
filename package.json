@@ -1,0 +1,18 @@
+[
+  {
+    "id":1,
+    "name":"养老服Mk3",
+    "packageName":"older",
+    "forgeVersion":"1.11.2",
+    "url":"http://lax-cdn.watchdragon.org/older/",
+    "info":"fsdfsdfsdfgf"
+  },
+  {
+    "id":2,
+    "name":"吃土格雷重置版",
+    "packageName":"gertech",
+    "forgeVersion":"1.11.2-forge1.11.2-13.20.0.2224",
+    "url":"http://syd-cdn.watchdragon.org/gertech/",
+    "info":"fsdfsdfsdfgf"
+  }
+]
